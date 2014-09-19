@@ -123,51 +123,6 @@ Style.prototype.recalculate = function(z) {
     this.fire('zoom');
 };
 
-Style.prototype._simpleLayer = function(layer) {
-    var simple = {};
-    simple.id = layer.id;
-
-    var bucket = this.buckets[layer.ref || layer.id];
-    if (bucket) simple.bucket = bucket.id;
-    if (layer.type) simple.type = layer.type;
-
-    if (layer.layers) {
-        simple.layers = [];
-        for (var i = 0; i < layer.layers.length; i++) {
-            simple.layers.push(this._simpleLayer(layer.layers[i]));
-        }
-    }
-    return simple;
-};
-
-// Split the layers into groups of consecutive layers with the same datasource
-Style.prototype._groupLayers = function(layers) {
-    var g = 0;
-    var groups = [];
-    var group;
-
-    // loop over layers top down
-    for (var i = layers.length - 1; i >= 0; i--) {
-        var layer = layers[i];
-
-        var bucket = this.buckets[layer.ref || layer.id];
-        var source = bucket && bucket.source;
-
-        // if the current layer is in a different source
-        if (group && source !== group.source) g++;
-
-        if (!groups[g]) {
-            group = [];
-            group.source = source;
-            groups[g] = group;
-        }
-
-        group.push(this._simpleLayer(layer));
-    }
-
-    return groups;
-};
-
 /*
  * Take all the rules and declarations from the stylesheet,
  * and figure out which apply currently
@@ -327,7 +282,6 @@ Style.prototype.cascade = function(options) {
     }
 
     this.transitions = transitions;
-    this.layerGroups = this._groupLayers(this.stylesheet.layers);
 
     this.fire('change');
 };
