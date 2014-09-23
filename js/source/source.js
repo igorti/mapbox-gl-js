@@ -75,11 +75,13 @@ Source.prototype = util.inherit(Evented, {
         return true;
     },
 
-    render: function(layer, computed) {
-        // Iteratively paint every tile.
-        if (!this.enabled) return;
+    renderedTiles: function() {
+        if (!this.enabled) return [];
+
         var order = Object.keys(this._tiles);
         order.sort(zOrder);
+
+        var tiles = [];
         for (var i = 0; i < order.length; i++) {
             var id = order[i];
             var tile = this._tiles[id];
@@ -88,9 +90,10 @@ Source.prototype = util.inherit(Evented, {
                 var z = pos.z, x = pos.x, y = pos.y, w = pos.w;
                 x += w * (1 << z);
                 tile.calculateMatrices(z, x, y, this.map.transform, this.painter);
-                this.painter.renderTile(layer, computed, tile, tile.posMatrix);
+                tiles.push(tile);
             }
         }
+        return tiles;
     },
 
     featuresAt: function(point, params, callback) {
